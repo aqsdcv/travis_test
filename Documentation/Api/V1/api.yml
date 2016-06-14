@@ -1,0 +1,560 @@
+swagger: '2.0'
+info:
+  title: E-collectivité documentation API
+  description: This is the documentation of the API
+  termsOfService: 'http://swagger.io/terms/'
+  version: 1.0.0
+host: cake.test.adullact.org
+basePath: /api/v1
+schemes:
+  - http
+  - https
+paths:
+  /users:
+    get:
+      tags:
+        - users
+      summary: Retrieve a list of users
+      consumes:
+        - application/json
+      produces:
+        - application/json
+        - application/xml
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              users:
+                type: array
+                items:
+                  $ref: '#/definitions/User'
+              pagination:
+                $ref: '#/definitions/Pagination'
+          examples:
+            application/json: |-
+              {
+                "users" : [
+                  {
+                    "id" : 1,
+                    "name" : "mreyrolle",
+                    "mail" : "maxime.reyrolle@example.org",
+                    "firstname" : "Maxime",
+                    "lastname" : "Reyrolle"
+                  },
+                  {
+                    "id" : 2,
+                    "name" : "aauzolat",
+                    "mail" : "arnaud.auzolat@example.org",
+                    "firstname" : "Arnaud",
+                    "lastname" : "Auzolat"
+                  }
+                ],
+                "pagination" :
+                  {
+                    "page_count" : 1,
+                    "current_page" : 1,
+                    "has_next_page" : false,
+                    "has_prev_page": false,
+                    "count": 2,
+                    "limit": null
+                  }
+              }
+    post:
+      tags:
+        - users
+      summary: Create user
+      description: This can only be done by the logged in user.
+      consumes:
+        - application/json
+        - x-www-form-urlencoded
+        - application/xml
+      produces:
+        - application/xml
+        - application/json
+      parameters:
+        - name: name
+          in: formData
+          description: The name of the user
+          required: true
+          type: string
+        - name: mail
+          in: formData
+          description: The mail of the user
+          required: true
+          type: string
+        - name: password
+          in: formData
+          description: The password of the user
+          required: true
+          type: string
+        - name: firstname
+          in: formData
+          description: The firstname of the user
+          required: true
+          type: string
+        - name: lastname
+          in: formData
+          description: The lastname of the user
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/User'
+          examples:
+            application/json: |-
+              {
+                "id" : 1,
+                "name" : "jdoe",
+                "mail" : "john.doe@example.org",
+                "firstname" : "John",
+                "lastname" : "Doe"
+              }
+        '400':
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ValidationError'
+          examples:
+            application/json: |-
+              {
+                "code": 400,
+                "url": "\/api\/v1\/users.json",
+                "message": "A validation error occurred",
+                "errorCount": 1,
+                "errors": {
+                  "name": {
+                    "unique": "The provided user already exists"
+                  }
+                }
+              }
+  '/users/{id}':
+    get:
+      tags:
+        - users
+      summary: Returns a user based on a single id
+      consumes:
+        - application/json
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name: id
+          in: path
+          description: id of the user to fetch
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/User'
+          examples:
+            application/json: |-
+              {
+                "id" : 1,
+                "name" : "mreyrolle",
+                "mail" : "maxime.reyrolle@example.org",
+                "firstname" : "Maxime",
+                "lastname": "Reyrolle"
+              }
+        '404':
+          description: User not found
+          schema:
+            $ref: '#/definitions/SimpleError'
+          examples:
+            application/json: |-
+              {
+                "message" : "The user with the id {id} does not exist",
+                "url" : "/users/{id}",
+                "code" : 404
+              }
+    put:
+      tags:
+        - users
+      summary: Updates a user based on a single id
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name : id
+          in: path
+          description: id of the user to update
+          required: true
+          type: integer
+        - name: mail
+          in: formData
+          description: The mail of the user
+          type: string
+        - name: password
+          in: formData
+          description: The password of the user
+          type: string
+        - name: firstname
+          in: formData
+          description: The firstname of the user
+          type: string
+        - name: lastname
+          in: formData
+          description: The lastname of the user
+          type: string
+      responses:
+        '200':
+          description: Succesful operation
+          schema:
+            $ref: '#/definitions/User'
+          examples:
+            application/json: |-
+              {
+                "id" : 1,
+                "name" : "mreyrolle",
+                "mail" : "maxime.reyrolle@example.org",
+                "firstname" : "Maxime",
+                "lastname": "Reyrolle"
+              }
+        '400':
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ValidationError'
+          examples:
+            application/json: |-
+              {
+                "code": 400,
+                "url": "\/api\/v1\/users\/1.json",
+                "message": "3 validation errors occurred",
+                "errorCount": 3,
+                "errors": {
+                  "password": {
+                    "_empty": "The password cannot be empty"
+                  },
+                  "mail": {
+                    "validFormat": "E-mail must be valid"
+                  },
+                  "firstname": {
+                    "_empty": "This field cannot be left empty"
+                  }
+                }
+              }
+    delete:
+      tags:
+        - users
+      summary: Deletes a user based on a single id
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name: id
+          in: path
+          description: id of the user to delete
+          required: true
+          type: integer
+      responses:
+        '204':
+          description: Successful operation
+          schema: { }
+        '404':
+          description: User not found
+          schema:
+            $ref: '#/definitions/SimpleError'
+          examples:
+            application/json: |-
+              {
+                "message" : "The user with the id {id} does not exist",
+                "url" : "/users/{id}",
+                "code" : 404
+              }
+  /connectors:
+    get:
+      tags:
+        - connectors
+      summary: List all the connectors
+      consumes:
+        - application/json
+      produces:
+        - application/json
+        - application/xml
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              connectors:
+                type: array
+                items:
+                  $ref: '#/definitions/Connector'
+              pagination:
+                $ref: '#/definitions/Pagination'
+          examples:
+            application/json: |-
+              {
+                "connectors" : [
+                  {
+                    "id" : 1,
+                    "name" : "pastell",
+                    "url" : "https://pastell.example.org"
+                  },
+                  {
+                    "id" : 2,
+                    "name" : "parapheur",
+                    "url" : "https://parapheur.example.org"
+                  }
+                ],
+                "pagination" :
+                  {
+                    "page_count" : 1,
+                    "current_page" : 1,
+                    "has_next_page" : false,
+                    "has_prev_page": false,
+                    "count": 2,
+                    "limit": null
+                  }
+              }
+    post:
+      tags:
+        - connectors
+      summary: Creates a connector
+      description: This can only be done by the logged in user.
+      consumes:
+        - application/json
+        - x-www-form-urlencoded
+        - application/xml
+      produces:
+        - application/xml
+        - application/json
+      parameters:
+        - name: name
+          in: formData
+          description: The name of the connector
+          required: true
+          type: string
+        - name: url
+          in: formData
+          description: The URL of the connector
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Connector'
+          examples:
+            application/json: |-
+              {
+                "id" : 1,
+                "name" : "pastell",
+                "url" : "https://pastell.example.org"
+              }
+        '400':
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ValidationError'
+          examples:
+            application/json: |-
+              {
+                "code": 400,
+                "url": "\/api\/v1\/connectors.json",
+                "message": "A validation error occurred",
+                "errorCount": 1,
+                "errors": {
+                  "url": {
+                    "validFormat": "URL must be valid"
+                  }
+                }
+              }
+  '/connectors/{id}':
+    get:
+      tags:
+        - connectors
+      summary: Returns a connector based on a single id
+      consumes:
+        - application/json
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name : id
+          in: path
+          description:  id of the connector to fetch
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Connector'
+          examples:
+            application/json: |-
+              {
+                "id" : 1,
+                "name" : "pastell",
+                "url" : "https://pastell.example.org"
+              }
+        404:
+          description: Connector not found
+          schema:
+            $ref: '#/definitions/SimpleError'
+          examples:
+            application/json: |-
+              {
+                "message" : "The connector with the id {id} does not exist",
+                "url" : "/api/v1/connectors/{id}",
+                "code" : 404
+              }
+    put:
+      tags:
+        - connectors
+      summary: Updates a connector based on a single id
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name : id
+          in: path
+          description: id of the user to update
+          required: true
+          type: integer
+        - name: url
+          in: formData
+          description: The url of the connector
+          type: string
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Connector'
+          examples:
+            application/json: |-
+              {
+                "id" : 1,
+                "name" : "pastell",
+                "url" : "https://pastell.example.org"
+              }
+        404:
+          description: Connector not found
+          schema:
+            $ref: '#/definitions/SimpleError'
+          examples:
+            application/json: |-
+              {
+                "message" : "The connector with the id {id} does not exist",
+                "url" : "/api/v1/connectors/{id}",
+                "code" : 404
+              }
+    delete:
+      tags:
+        - connectors
+      summary: Deletes a connector based on a single id
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name: id
+          in: path
+          description: id of the connector to delete
+          required: true
+          type: integer
+      responses:
+        '204':
+          description: Successful operation
+          schema: { }
+        '404':
+          description: Connector not found
+          schema:
+            $ref: '#/definitions/SimpleError'
+          examples:
+            application/json: |-
+              {
+                "message" : "The connector with the id {id} does not exist",
+                "url" : "/api/v1/connectors/{id}",
+                "code" : 404
+              }
+definitions:
+  User:
+    properties:
+      id:
+        description: The id of the user
+        type: integer
+      name:
+        description: The username of the user
+        type: string
+      mail:
+        description: The email address of the user
+        type: string
+      firstname:
+        description: The firstname of the user
+        type: string
+      lastname:
+        description: The lastname of the user
+        type: string
+  Connector:
+    properties:
+      id:
+        description: The id of the connector
+        type: integer
+      name:
+        description: The name of the connector
+        type: string
+      url:
+        description: The URL address where the connector lives
+        type: string
+  Pagination:
+    properties:
+      page_count:
+        description: The number of pages
+        type: integer
+      current_page:
+        description: The page we are currently at
+        type: integer
+      has_next_page:
+        description: If there is a next page
+        type: boolean
+      has_prev_page:
+        description: If there is a previous page
+        type: boolean
+      count:
+        description: The total number of pages
+        type: integer
+      limit:
+        description: The number of items per page
+        type: integer
+  SimpleError:
+      properties:
+        message:
+          description: Explains what is the problem
+          type: string
+        url:
+          description: path where happens the error
+          type: string
+        code:
+          description: HTTP error code
+          type: integer
+  ValidationError:
+    properties:
+      message:
+        description: Explains what is the problem
+        type: string
+      url:
+        description: path where happens the error
+        type: string
+      code:
+        description: HTTP error code
+        type: integer
+      errorCount:
+        description: The number of errors that happened in the validation
+        type: integer
+      errors:
+        type: "object"
+        additionalProperties:
+          $ref: '#/definitions/ValidationErrorField'
+  ValidationErrorField:
+    properties:
+      field_name:
+        $ref: '#/definitions/ValidationErrorFieldExplanation'
+  ValidationErrorFieldExplanation:
+    properties:
+      type_of_error:
+        description: The type of error that happened (_empty, validFormat, unique)
+        type: string
