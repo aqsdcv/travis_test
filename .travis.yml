@@ -41,7 +41,23 @@ before_script:
 
   - phpenv rehash
   - set +H
-  - cp config/app.php config/app_local.php
+  - |
+    cat > config/app_local.php <<'CONFIG'
+    <?php
+    return [
+        'Datasources' => [
+            'test' => [
+                'datasource' => 'Database/Mysql',
+                'host'       => '0.0.0.0',
+                'database'   => 'cakephp_test',
+                'username'   => 'travis',
+                'password'   => '',
+                'encoding'   => 'utf8'
+            ]
+        ]
+    ];
+    CONFIG
+  - sed -i "/'app_local'/s/^\/\///g" config/bootstrap.php
 
 script:
   - sh -c "if [ '$COVERALLS' = '1' ]; then phpunit --coverage-clover build/logs/clover.xml; fi"
